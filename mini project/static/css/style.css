@@ -1,0 +1,97 @@
+/* General body styling */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image: url('https://www.geeky-gadgets.com/wp-content/uploads/2024/06/ChatTTS-a-new-open-source-AI-voice-text-to-speech-AI-model.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    color: #f0e8e8;
+    text-align: center;
+}
+
+.container {
+    margin-top: 20%;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background for readability */
+    padding: 20px;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+/* Microphone icon styling */
+.microphone-icon {
+    width: 50px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: inline-block;
+    position: relative;
+}
+
+/* Wave animation styling */
+.wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(45deg, #ff0080, #6eeb83, #6a0dad);
+    opacity: 0.8;
+    border-radius: 50%;
+    filter: blur(20px);
+    transform: translate(-50%, -50%);
+    animation: pulse 3s infinite;
+    z-index: -1;
+    display: none; /* Initially hidden */
+}
+
+.wave.active {
+    display: block; /* Show when microphone is clicked */
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.3);
+        opacity: 1;
+    }
+}
+
+/* Header styling */
+h1 {
+    color: #c2e2c3;
+    margin-bottom: 20px;
+}
+
+/* Button styling */
+button {
+    margin: 0;
+    padding: 0;
+    font-size: 0px;
+    color: transparent;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* Input styling */
+input[type="text"] {
+    padding: 10px;
+    width: 250px;
+    margin: 10px;
+    border: 1px solid #0a9751;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Add responsive styling */
+@media (max-width: 600px) {
+    input[type="text"], button {
+        width: 90%;
+        margin: 10px auto;
+    }
+}

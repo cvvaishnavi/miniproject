@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VEERA</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>VEERA</h1>
+        <!-- Status and Response Display -->
+        <p id="status">Say "Hey Veera" to wake up</p>
+        <p id="response"></p>
+    </div>
+
+    <script>
+        const statusDisplay = document.getElementById('status');
+        const responseDisplay = document.getElementById('response');
+        let recognition = null;
+        let wakeRecognition = null;
+
+        function initializeWakeWordRecognition() {
+            if (!('webkitSpeechRecognition' in window)) {
+                alert("Sorry, your browser doesn't support voice recognition.");
+                return;
+            }
+
+            wakeRecognition = new webkitSpeechRecognition();
+            wakeRecognition.lang = 'en-US';
+            wakeRecognition.interimResults = false;
+            wakeRecognition.continuous = true;
+
+            wakeRecognition.onstart = () => {
+                statusDisplay.textContent = "Say 'Hey Veera'";
+            };
+
+            wakeRecognition.onresult = (event) => {
+                const wakeCommand = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                console.log(`Wake Command: ${wakeCommand}`);
+                if (wakeCommand === "hey veera" || wakeCommand === "veera") {
+                    wakeRecognition.stop();
+                    speakResponse("Veera turned on");
+                    enableListening();
+                }
+            };
+
+            wakeRecognition.onerror = (event) => {
+                console.error('Wake word recognition error:', event.error);
+                statusDisplay.textContent = "Error in wake word recognition. Restarting...";
+                wakeRecognition.start();
+            };
+
+            wakeRecognition.start();
+        }
+
+        function enableListening() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+
+            statusDisplay.textContent = "Listening... Say 'Stop Veera' to turn off.";
+
+            recognition = new webkitSpeechRecognition();
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+            recognition.continuous = true;
+
+            recognition.onresult = (event) => {
+                const command = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+                console.log(`Command: ${command}`);
+                if (command === "stop veera") {
+                    disableListening();
+                    speakResponse("Veera turned off");
+                } else {
+                    statusDisplay.textContent = `You said: "${command}"`;
+                    sendCommandToBackend(command);
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.error('Recognition error:', event.error);
+                statusDisplay.textContent = "Error in command recognition. Restarting...";
+                recognition.stop();
+                recognition = null;
+                wakeRecognition.start();
+            };
+
+            recognition.onend = () => {
+                statusDisplay.textContent = "Say 'Hey Veera' to wake up";
+                wakeRecognition.start();
+            };
+
+            recognition.start();
+        }
+
+        function disableListening() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+            statusDisplay.textContent = "Say 'Hey Veera' to wake up";
+            wakeRecognition.start();
+        }
+
+        function sendCommandToBackend(command) {
+            fetch('/process_command', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ command: command })
+            })
+            .then(response => response.json())
+            .then(result => {
+                responseDisplay.textContent = result.message;
+                speakResponse(result.message); // Speak the backend response
+            })
+            .catch(error => {
+                responseDisplay.textContent = "An error occurred. Please try again.";
+                console.error('Error:', error);
+            });
+        }
+
+        function speakResponse(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = 'en-US';
+
+            utterance.onstart = () => {
+                console.log('Speech synthesis started.');
+            };
+
+            utterance.onend = () => {
+                console.log('Speech synthesis finished.');
+            };
+
+            utterance.onerror = (event) => {
+                console.error('Speech synthesis error:', event.error);
+            };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // Start wake word detection
+        initializeWakeWordRecognition();
+    </script>
+</body>
+</html>
